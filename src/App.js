@@ -5,58 +5,46 @@ import ProductsPage from './pages/ProductsPage';
 import CartPage from './pages/CartPage';
 import { plants } from './data/plantsData';
 
+// Importar funciones del slice
+import {
+  addItem,
+  removeItem,
+  updateQuantity,
+  getTotalItems,
+  getTotalPrice,
+  isItemInCart
+} from './slices/cartSlice';
+
 const App = () => {
   const [currentPage, setCurrentPage] = useState('landing');
   const [cart, setCart] = useState([]);
 
-  // Funciones del carrito
+  // Envuelve las funciones con setCart
   const addToCart = (plant) => {
-    const existingItem = cart.find(item => item.id === plant.id);
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === plant.id 
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...plant, quantity: 1 }]);
-    }
+    setCart(prev => addItem(prev, plant));
   };
 
   const incrementItem = (plantId) => {
-    setCart(cart.map(item => 
-      item.id === plantId 
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    ));
+    setCart(prev => updateQuantity(prev, plantId, 1));
   };
 
   const decrementItem = (plantId) => {
-    setCart(cart.map(item => 
-      item.id === plantId 
-        ? { ...item, quantity: Math.max(0, item.quantity - 1) }
-        : item
-    ).filter(item => item.quantity > 0));
+    setCart(prev => updateQuantity(prev, plantId, -1));
   };
 
-  const removeItem = (plantId) => {
-    setCart(cart.filter(item => item.id !== plantId));
+  const removeCartItem = (plantId) => {
+    setCart(prev => removeItem(prev, plantId));
   };
 
-  const getTotalItems = () => cart.reduce((total, item) => total + item.quantity, 0);
-  const getTotalPrice = () => cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const isPlantInCart = (plantId) => cart.some(item => item.id === plantId);
-
-  // Props comunes para pasar a los componentes
   const cartProps = {
     cart,
     addToCart,
     incrementItem,
     decrementItem,
-    removeItem,
-    getTotalItems,
-    getTotalPrice,
-    isPlantInCart
+    removeItem: removeCartItem,
+    getTotalItems: () => getTotalItems(cart),
+    getTotalPrice: () => getTotalPrice(cart),
+    isPlantInCart: (id) => isItemInCart(cart, id)
   };
 
   const navigationProps = {
@@ -64,9 +52,8 @@ const App = () => {
     setCurrentPage
   };
 
-  // Renderizado condicional de páginas
   const renderPage = () => {
-    switch(currentPage) {
+    switch (currentPage) {
       case 'landing':
         return <LandingPage {...navigationProps} />;
       case 'products':

@@ -24,13 +24,15 @@ const ProductsPage = ({
               {category}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {plants.filter(plant => plant.category === category).map(plant => (
-                <ProductCard 
-                  key={plant.id}
-                  plant={plant}
-                  addToCart={addToCart}
-                  isPlantInCart={isPlantInCart}
-                />
+              {plants
+                .filter(plant => plant.category === category)
+                .map(plant => (
+                  <ProductCard 
+                    key={plant.id}
+                    plant={plant}
+                    addToCart={addToCart}
+                    isPlantInCart={isPlantInCart}
+                  />
               ))}
             </div>
           </div>
